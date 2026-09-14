@@ -1,6 +1,6 @@
 # Does `v1` still point at what `main` says?
 #
-# Customers write `uses: initialcodess/logdrop-taint-action@v1` and download
+# Customers write `uses: initialcodess/logdrop-taint-ios-action@v1` and download
 # `examples/*` from the `v1` ref. Merging to `main` therefore reaches nobody: until
 # the tag moves, `@v1` keeps serving the previous commit. That has happened twice —
 # once when the panel reporting script was added and once when a rejected report was

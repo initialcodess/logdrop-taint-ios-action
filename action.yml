@@ -99,7 +99,7 @@ runs:
         fi
 
         archive="logdrop-taint-${VERSION}-macos-universal.tar.gz"
-        base="https://github.com/initialcodess/logdrop-taint-action/releases/download/${VERSION}"
+        base="https://github.com/initialcodess/logdrop-taint-ios-action/releases/download/${VERSION}"
 
         curl -fsSL --retry 3 --retry-delay 2 -o "$dir/$archive" "$base/$archive"
         curl -fsSL --retry 3 --retry-delay 2 -o "$dir/$archive.sha256" "$base/$archive.sha256"

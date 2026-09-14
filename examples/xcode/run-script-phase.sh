@@ -41,7 +41,7 @@ if [ -z "${LOGDROP_LICENSE:-}" ] && [ -f "$HOME/.logdrop/license" ]; then
 fi
 
 if [ ! -x "$BIN" ]; then
-  echo "warning: LogDrop Taint is not installed — see https://github.com/initialcodess/logdrop-taint-action"
+  echo "warning: LogDrop Taint is not installed — see https://github.com/initialcodess/logdrop-taint-ios-action"
   exit 0
 fi
 

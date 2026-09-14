@@ -32,7 +32,7 @@ jobs:
       security-events: write   # only if you upload to Code Scanning
     steps:
       - uses: actions/checkout@v4
-      - uses: initialcodess/logdrop-taint-action@v1
+      - uses: initialcodess/logdrop-taint-ios-action@v1
         with:
           license: ${{ secrets.LOGDROP_LICENSE }}
           path: Sources
@@ -50,8 +50,8 @@ toolchain, no Homebrew. So you are not tied to GitHub Actions:
 ```bash
 # Download it once (change the version as needed)
 V=v1.24.0
-curl -fsSL -O "https://github.com/initialcodess/logdrop-taint-action/releases/download/$V/logdrop-taint-$V-macos-universal.tar.gz"
-curl -fsSL -O "https://github.com/initialcodess/logdrop-taint-action/releases/download/$V/logdrop-taint-$V-macos-universal.tar.gz.sha256"
+curl -fsSL -O "https://github.com/initialcodess/logdrop-taint-ios-action/releases/download/$V/logdrop-taint-$V-macos-universal.tar.gz"
+curl -fsSL -O "https://github.com/initialcodess/logdrop-taint-ios-action/releases/download/$V/logdrop-taint-$V-macos-universal.tar.gz.sha256"
 shasum -a 256 -c "logdrop-taint-$V-macos-universal.tar.gz.sha256"   # integrity
 tar -xzf "logdrop-taint-$V-macos-universal.tar.gz"
 
@@ -149,7 +149,7 @@ for the same app on one screen, and carry "this is a false positive" decisions
 across scans, you can send the report to the panel:
 
 ```yaml
-- uses: initialcodess/logdrop-taint-action@v1
+- uses: initialcodess/logdrop-taint-ios-action@v1
   with:
     license: ${{ secrets.LOGDROP_LICENSE }}
     path: Sources

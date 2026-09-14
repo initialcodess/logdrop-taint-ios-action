@@ -16,7 +16,7 @@ set -euo pipefail
 
 VERSION="${LOGDROP_VERSION:-v1.24.0}"
 BIN_DIR="${LOGDROP_BIN_DIR:-$PWD/bin}"
-REPO="initialcodess/logdrop-taint-action"
+REPO="initialcodess/logdrop-taint-ios-action"
 
 # Validate the version format: a wrong value turns into a baffling 404.
 if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
