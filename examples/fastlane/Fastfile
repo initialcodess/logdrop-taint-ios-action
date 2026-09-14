@@ -21,7 +21,7 @@ lane :security_scan do
   bin_dir = File.expand_path("~/.logdrop/bin")
 
   # Install it (skipped if already installed)
-  sh("LOGDROP_VERSION=v1.24.0 LOGDROP_BIN_DIR=#{bin_dir} bash #{__dir__}/../install-logdrop-taint.sh")
+  sh("LOGDROP_VERSION=v1.24.1 LOGDROP_BIN_DIR=#{bin_dir} bash #{__dir__}/../install-logdrop-taint.sh")
 
   # The scan. sh(...) raises on a non-zero exit; we catch it by hand so the code can
   # be read and acted on — 1 (findings) is not the same thing as 2 (licence).
