@@ -21,7 +21,7 @@ pipeline {
   agent { label 'macos' }
 
   environment {
-    LOGDROP_VERSION = 'v1.24.0'
+    LOGDROP_VERSION = 'v1.24.1'
     LOGDROP_BIN_DIR = "${WORKSPACE}/.logdrop/bin"
   }
 

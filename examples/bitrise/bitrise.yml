@@ -22,7 +22,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 workflows:
   security-scan:
     envs:
-      - LOGDROP_VERSION: v1.24.0
+      - LOGDROP_VERSION: v1.24.1
       - LOGDROP_BIN_DIR: $BITRISE_SOURCE_DIR/.logdrop/bin
     steps:
       - activate-ssh-key: {}

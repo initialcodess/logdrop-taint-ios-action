@@ -8,13 +8,13 @@
 #
 # Usage:
 #   ./install-logdrop-taint.sh                 # default version, into ./bin
-#   LOGDROP_VERSION=v1.24.0 ./install-logdrop-taint.sh
+#   LOGDROP_VERSION=v1.24.1 ./install-logdrop-taint.sh
 #   LOGDROP_BIN_DIR=/usr/local/bin ./install-logdrop-taint.sh
 #
 # Output: $LOGDROP_BIN_DIR/logdrop-taint
 set -euo pipefail
 
-VERSION="${LOGDROP_VERSION:-v1.24.0}"
+VERSION="${LOGDROP_VERSION:-v1.24.1}"
 BIN_DIR="${LOGDROP_BIN_DIR:-$PWD/bin}"
 REPO="initialcodess/logdrop-taint-ios-action"
 

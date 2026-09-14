@@ -23,7 +23,7 @@ security-scan:
   tags:
     - macos            # the tag of your own macOS runner
   variables:
-    LOGDROP_VERSION: "v1.24.0"
+    LOGDROP_VERSION: "v1.24.1"
     LOGDROP_BIN_DIR: "$CI_PROJECT_DIR/.logdrop/bin"
   cache:
     key: "logdrop-taint-$LOGDROP_VERSION"
