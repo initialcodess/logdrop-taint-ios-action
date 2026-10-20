@@ -32,7 +32,7 @@ jobs:
       security-events: write   # only if you upload to Code Scanning
     steps:
       - uses: actions/checkout@v4
-      - uses: initialcodess/logdrop-taint-ios-action@v1
+      - uses: initialcodess/logdrop-taint-ios-action@ad9adc4f52f9a239191805e677034d38de5bf0f3  # v1
         with:
           license: ${{ secrets.LOGDROP_LICENSE }}
           path: Sources
@@ -41,6 +41,24 @@ jobs:
 
 `macos-15` is required (Swift 6+). The analyzer is downloaded prebuilt — nothing
 is compiled in your project.
+
+### Why a commit hash and not `@v1`
+
+`@v1` is a pointer we move. Whoever can move it decides what runs in your CI with your
+source checked out — and the binary this action installs is verified against a checksum
+that **travels inside the action**, so the pin is what gives that check its force. Name a
+commit and both are fixed: replacing a release is no longer enough, because the expected
+checksum sits in a commit you named.
+
+`@v1` still works and still tracks the latest 1.x. It asks you to trust us continuously
+rather than once, which is a reasonable thing to choose — it should just be a choice
+rather than the only option shown.
+
+The hash above is what `v1` points to today. Find the current one with:
+
+```bash
+gh api repos/initialcodess/logdrop-taint-ios-action/commits/v1 --jq .sha
+```
 
 ## Using it without GitHub (your machine, your server)
 
@@ -149,7 +167,7 @@ for the same app on one screen, and carry "this is a false positive" decisions
 across scans, you can send the report to the panel:
 
 ```yaml
-- uses: initialcodess/logdrop-taint-ios-action@v1
+- uses: initialcodess/logdrop-taint-ios-action@ad9adc4f52f9a239191805e677034d38de5bf0f3  # v1
   with:
     license: ${{ secrets.LOGDROP_LICENSE }}
     path: Sources
