@@ -32,17 +32,17 @@ jobs:
       # Cache the binary per version: no need to download it on every run.
       - restore_cache:
           keys:
-            - logdrop-taint-v1.24.5
+            - logdrop-taint-v1.25.0
 
       - run:
           name: Install LogDrop Taint
           command: |
-            LOGDROP_VERSION=v1.24.5 \
+            LOGDROP_VERSION=v1.25.0 \
             LOGDROP_BIN_DIR="$HOME/.logdrop/bin" \
             bash examples/install-logdrop-taint.sh
 
       - save_cache:
-          key: logdrop-taint-v1.24.5
+          key: logdrop-taint-v1.25.0
           paths:
             - ~/.logdrop/bin
 
