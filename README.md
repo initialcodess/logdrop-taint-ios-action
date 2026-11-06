@@ -135,6 +135,7 @@ A file named directly on the command line is always scanned, whatever it is call
 | User or network data is built into an `NSPredicate` format string instead of being passed as an argument | CWE-943 |
 | Personal data or a credential is copied to the system pasteboard, which every other app can read | CWE-200 |
 | A server certificate is accepted without anything having checked it | CWE-295 |
+| A biometric prompt's yes is trusted on its own, and no secret is bound to biometrics (a jailbroken device can answer yes) | CWE-287 |
 
 Memory and resource leaks are reported too, and are on by default — set
 `leaks: "false"` to turn them off. They are a different question from the ones
