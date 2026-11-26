@@ -141,7 +141,7 @@ runs:
         if [ "$SNIPPETS" = "false" ]; then args+=(--no-snippets); else args+=(--snippets); fi
         if [ "$LEAKS" = "true" ]; then args+=(--leaks); else args+=(--no-leaks); fi
 
-        # PRESERVE the exit code: 0 clean · 1 findings · 2 licence. Each means something different.
+        # PRESERVE the exit code: 0 clean · 1 findings · 2 licence · 3 config error. Each means something different.
         set +e
         "$BIN_DIR/logdrop-taint" "${args[@]}" | tee scan-output.txt
         status=${PIPESTATUS[0]}

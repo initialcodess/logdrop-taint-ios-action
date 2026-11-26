@@ -15,6 +15,30 @@ The first two live in [`install-logdrop-taint.sh`](install-logdrop-taint.sh), an
 every recipe below calls it. On GitHub Actions you do not even need that — the
 action does both for you.
 
+## Getting the scripts
+
+The recipes call [`install-logdrop-taint.sh`](install-logdrop-taint.sh) and
+[`report-to-panel.sh`](report-to-panel.sh) as `bash examples/...`. Those two files live in
+the action repository, **not in yours**, so a recipe copied on its own fails at its first
+step. Put them in your repository at `examples/` before using any recipe except Xcode
+(which has [its own install step](#in-xcode)). From your repository root:
+
+```bash
+REF=v1.26.0   # a release tag; use a full commit hash to pin harder
+BASE="https://raw.githubusercontent.com/initialcodess/logdrop-taint-ios-action/$REF/examples"
+mkdir -p examples
+curl -fsSL -o examples/install-logdrop-taint.sh "$BASE/install-logdrop-taint.sh"
+curl -fsSL -o examples/report-to-panel.sh "$BASE/report-to-panel.sh"
+chmod +x examples/*.sh
+git add examples/install-logdrop-taint.sh examples/report-to-panel.sh
+```
+
+Commit them. The installer carries a table of expected checksums, so fetching it at a
+commit you named fixes what it will accept. The local recipe (`local/scan.sh`) and the
+fastlane recipe expect the same layout: the two scripts in `examples/`. Copy
+`local/scan.sh` to `examples/local/scan.sh`; the fastlane lane goes in your own
+`fastlane/Fastfile`, which sits at your repository root next to `examples/`.
+
 ## Sending the report to the panel
 
 Optional, and off until you switch it on. Every recipe here ends by calling
@@ -34,25 +58,26 @@ the recipe. Miss one and nothing is sent, quietly — so if the dashboard stays 
 check that all three are actually reaching the job.
 
 **The bundle id must be registered for that project in the panel.** One the panel
-does not recognise is refused outright, nothing is stored, and the step fails. That
-is deliberate: a typo you can see beats a green pipeline that sent nothing.
+does not recognise is refused outright and nothing is stored. The step says so loudly
+and, by default, still exits 0; set `FAIL_ON_DELIVERY_ERROR=true` to make a refusal
+fail the step.
 
 **The analyzer itself never contacts anything.** It verifies its licence offline,
 counts no usage and does not report that it ran. Sending is a separate step, on a
 report that already exists, run by you — which is why it is a script you can read
 rather than a flag inside the binary.
 
-**A rejected report fails the build; a panel that is down does not.** If the panel
-refuses the report — the usual cause is a `BUNDLE_ID` not registered for your
-project — the step exits non-zero and you see it. A step that stayed green while no
-report ever arrived is the failure nobody notices until someone asks why the
-dashboard is empty.
+**A report that never arrives does not fail your build, unless you ask.** By default
+every delivery problem — a report the panel refuses (the usual cause is a `BUNDLE_ID`
+not registered for your project), a refused key, an unreachable panel, a panel under
+maintenance — prints a loud warning and the step exits 0. The scan's exit code already
+said what it found, and a problem the developer who pushed the commit cannot fix must
+not turn their build red.
 
-If the panel is unreachable, under maintenance, or simply not configured, the step
-exits 0 and your build is untouched. The scan's exit code already said what it
-found, and a maintenance window on our side must not turn your green build red an
-hour later. An expired or revoked licence is in this second group too: the
-developer who pushed the commit cannot fix it, so it warns rather than blocks.
+The cost of that default is that a report can go missing while the pipeline stays
+green. If you want delivery guaranteed, set `FAIL_ON_DELIVERY_ERROR=true` for the step:
+then any failure to deliver exits 1. (The GitHub Action's equivalent is
+`fail-on-delivery-error: "true"`.)
 
 Which customer a report belongs to comes from your **licence key**, not from
 anything the recipe sends.
@@ -62,7 +87,7 @@ anything the recipe sends.
 | Code | Meaning | What CI should do |
 |---|---|---|
 | `0` | Clean | Carry on |
-| `1` | Findings (with `--fail-on-findings`) | Fail the build, block the pull request |
+| `1` | Findings (with `--fail-on-findings`; `note`-level findings never cause it) | Fail the build, block the pull request |
 | `2` | Licence missing / invalid / expired | Fail, but DO NOT say "your code has a vulnerability" |
 | `3` | An error in `.logdrop.json` | Fail, fix the config file |
 
@@ -115,8 +140,26 @@ if you use your own Mac as a runner, which most iOS teams already have.
 The scan runs on every build and findings appear as warnings against the lines that
 caused them, so you see a leak while you are still writing it.
 
-1. Copy [`xcode/run-script-phase.sh`](xcode/run-script-phase.sh) to
-   `~/.logdrop/xcode-scan.sh` and make it executable.
+**Install the analyzer first.** The phase only runs it; it expects the binary at
+`~/.logdrop/bin/logdrop-taint` and, to send reports, the script at
+`~/.logdrop/report-to-panel.sh`. With no binary the build log gets
+`warning: LogDrop Taint is not installed` and the build carries on; with no
+`report-to-panel.sh` the panel step is skipped without a word. Once, in a terminal:
+
+```bash
+REF=v1.26.0   # a release tag; use a full commit hash to pin harder
+BASE="https://raw.githubusercontent.com/initialcodess/logdrop-taint-ios-action/$REF/examples"
+mkdir -p "$HOME/.logdrop"
+curl -fsSL -o "$HOME/.logdrop/install-logdrop-taint.sh" "$BASE/install-logdrop-taint.sh"
+curl -fsSL -o "$HOME/.logdrop/xcode-scan.sh" "$BASE/xcode/run-script-phase.sh"
+curl -fsSL -o "$HOME/.logdrop/report-to-panel.sh" "$BASE/report-to-panel.sh"   # only to send reports
+LOGDROP_BIN_DIR="$HOME/.logdrop/bin" bash "$HOME/.logdrop/install-logdrop-taint.sh"
+chmod +x "$HOME/.logdrop/xcode-scan.sh"
+```
+
+Then:
+
+1. `~/.logdrop/xcode-scan.sh` is already in place from the commands above.
 2. In Xcode, select the project, pick your target, open **Build Phases**.
 3. **+** → **New Run Script Phase**.
 4. Paste: `bash "$HOME/.logdrop/xcode-scan.sh"`

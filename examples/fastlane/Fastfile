@@ -1,5 +1,11 @@
 # fastlane — LogDrop Taint
 #
+# GET THE TWO SCRIPTS FIRST. This recipe calls examples/install-logdrop-taint.sh
+# and examples/report-to-panel.sh. They live in the action repository, not in yours:
+# copy them into <repo>/examples/, next to your fastlane/ directory (or fetch them
+# at the commit you pin).
+# Commands: examples/README.md, section "Getting the scripts".
+#
 # Add this to your Fastfile. Running it BEFORE the Xcode build makes sense: with
 # findings it stops before you spend time compiling.
 #
@@ -12,24 +18,29 @@
 #   BUNDLE_ID        your application's bundle id, AS REGISTERED IN THE PANEL
 #
 # Miss any one and nothing is sent: the step prints a line and stays green,
-# which is easy not to notice. A BUNDLE_ID the panel does not recognise for
-# this project is refused (400) and FAILS the step, so a wrong id is loud
-# rather than silent.
+# which is easy not to notice. A report the panel refuses (a BUNDLE_ID it does
+# not recognise for this project, say) is a loud warning, but the step still
+# exits 0. Set FAIL_ON_DELIVERY_ERROR=true to make any failed delivery fail it.
 
 desc "Taint (data-flow) scan over the source"
 lane :security_scan do
   bin_dir = File.expand_path("~/.logdrop/bin")
+  # __dir__ is your fastlane/ directory, so its parent is the repository root. The
+  # scripts are expected at <repo>/examples/ (see the header). fastlane's sh() runs
+  # from fastlane/, so everything below uses absolute paths.
+  repo_root = File.expand_path("..", __dir__)
+  sarif = File.join(repo_root, "logdrop-taint.sarif")
 
   # Install it (skipped if already installed)
-  sh("LOGDROP_VERSION=v1.26.0 LOGDROP_BIN_DIR=#{bin_dir} bash #{__dir__}/../install-logdrop-taint.sh")
+  sh("LOGDROP_VERSION=v1.26.0 LOGDROP_BIN_DIR=#{bin_dir} bash #{repo_root}/examples/install-logdrop-taint.sh")
 
   # The scan. sh(...) raises on a non-zero exit; we catch it by hand so the code can
   # be read and acted on — 1 (findings) is not the same thing as 2 (licence).
   status = 0
-  Dir.chdir(File.expand_path("..", __dir__ + "/../..")) do
+  Dir.chdir(repo_root) do
     system(
       "#{bin_dir}/logdrop-taint", "Sources",
-      "--sarif", "logdrop-taint.sarif",
+      "--sarif", sarif,
       "--repo-root", Dir.pwd,
       "--verbose", "--fail-on-findings"
     )
@@ -38,11 +49,11 @@ lane :security_scan do
 
   # Send the report on before acting on the exit code, so a failing scan still
   # reaches the panel. Does nothing unless PANEL_URL is set.
-  sh("bash #{__dir__}/../report-to-panel.sh logdrop-taint.sarif")
+  sh("bash #{repo_root}/examples/report-to-panel.sh #{sarif}")
 
   case status
   when 0 then UI.success("LogDrop Taint: no findings.")
-  when 1 then UI.user_error!("LogDrop Taint reported findings — see logdrop-taint.sarif")
+  when 1 then UI.user_error!("LogDrop Taint reported findings — see #{sarif}")
   when 2 then UI.user_error!("The LogDrop licence is invalid or expired.")
   when 3 then UI.user_error!("There is an error in the .logdrop.json config file.")
   else        UI.user_error!("LogDrop Taint returned an unexpected exit code: #{status}")
