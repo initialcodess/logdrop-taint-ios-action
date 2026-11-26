@@ -16,25 +16,33 @@
 #                          run fails loudly rather than passing while proving nothing.
 #   3. Schedules live in CircleCI's UI as a trigger; the weekly run that used to be
 #      a GitHub cron is set up there.
-#   4. macOS is a paid resource class on CircleCI. If the plan does not include it
-#      the job QUEUES at "Preparing environment" rather than failing.
+#   4. The job runs on our self-hosted Mac runner (`initialcodess/macos`). That Mac
+#      must be awake and its runner agent running, or the job queues.
 
 version: 2.1
 
-# CircleCI's cloud macOS.
+# Our own Mac, registered with CircleCI as a self-hosted runner.
 #
-# The self-hosted runner was tried first and the machine's own connection was the
-# limit, not the pipeline — see the analyzer repo's config for the measurements. A
-# job also does not FAIL when that Mac is asleep, it queues, which is the wrong
-# behaviour for a test whose whole point is to run unattended once a week.
+# Cloud macOS was used here before and never ran a single job: the organisation is on
+# CircleCI's Free plan, which carries no macOS. Every smoke job sat at "Preparing
+# environment"; the v1.26.0 one waited 15h49m and was then rejected with "resource
+# class macos.m1.medium.gen1, image xcode:16.2.0 is not a valid resource class".
+# Moving to xcode 16.4.0 and to m4pro.medium changed nothing.
 #
-# `xcode` is the value to check against CircleCI's current image list; nothing here
-# compiles Swift, so it only has to be a macOS image that exists.
+# The runner was set aside earlier because the machine's own connection was the limit
+# and because a job QUEUES rather than fails while that Mac is asleep. Both still
+# hold. A job that runs when the Mac is awake beats one that can never run.
+#
+# This repository is public, so who can start a job here matters: the GitHub trigger
+# fires on pushes to this repository only, not on pull requests from forks, so code
+# from outside cannot run on this machine. Keep it that way.
+#
+# Nothing here compiles Swift: the job downloads and runs the published universal
+# binary, exactly as a customer does.
 executors:
   mac:
-    macos:
-      xcode: "16.4.0"
-    resource_class: m4pro.medium
+    machine: true
+    resource_class: initialcodess/macos
 
 jobs:
   smoke:
