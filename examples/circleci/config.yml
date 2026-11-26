@@ -30,7 +30,7 @@ version: 2.1
 jobs:
   security-scan:
     macos:
-      xcode: "16.0"
+      xcode: "16.4.0"
     steps:
       - checkout
 
