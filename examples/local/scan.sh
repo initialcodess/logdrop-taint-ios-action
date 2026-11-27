@@ -7,6 +7,11 @@
 #
 # No CI needed at all. Same binary, same rules, same exit codes.
 #
+# GET THE TWO SCRIPTS FIRST. This script calls ../install-logdrop-taint.sh and
+# ../report-to-panel.sh. They live in the action repository, not in yours:
+# copy them into your repository at those paths (or fetch them at the commit you pin).
+# Commands: examples/README.md, section "Getting the scripts".
+#
 # SENDING TO THE PANEL (optional) — three variables, and all three are needed:
 #
 #   PANEL_URL        your panel's address
@@ -14,9 +19,9 @@
 #   BUNDLE_ID        your application's bundle id, AS REGISTERED IN THE PANEL
 #
 # Miss any one and nothing is sent: the step prints a line and stays green,
-# which is easy not to notice. A BUNDLE_ID the panel does not recognise for
-# this project is refused (400) and FAILS the step, so a wrong id is loud
-# rather than silent.
+# which is easy not to notice. A report the panel refuses (a BUNDLE_ID it does
+# not recognise for this project, say) is a loud warning, but the step still
+# exits 0. Set FAIL_ON_DELIVERY_ERROR=true to make any failed delivery fail it.
 # On a laptop you usually set none of them and the report simply stays here.
 set -euo pipefail
 

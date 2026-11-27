@@ -32,7 +32,7 @@ jobs:
       security-events: write   # only if you upload to Code Scanning
     steps:
       - uses: actions/checkout@v4
-      - uses: initialcodess/logdrop-taint-ios-action@ad9adc4f52f9a239191805e677034d38de5bf0f3  # v1
+      - uses: initialcodess/logdrop-taint-ios-action@6466f50054d759603d2ff67fc79cdbbb2fdf80af  # v1
         with:
           license: ${{ secrets.LOGDROP_LICENSE }}
           path: Sources
@@ -45,16 +45,22 @@ is compiled in your project.
 ### Why a commit hash and not `@v1`
 
 `@v1` is a pointer we move. Whoever can move it decides what runs in your CI with your
-source checked out — and the binary this action installs is verified against a checksum
-that **travels inside the action**, so the pin is what gives that check its force. Name a
-commit and both are fixed: replacing a release is no longer enough, because the expected
-checksum sits in a commit you named.
+source checked out. Name a commit and the action's code is fixed, along with the
+`analyzer-version` it installs by default.
+
+What a commit does **not** fix is the binary's checksum, on this path. The action
+verifies the downloaded archive against the `.sha256` file published beside it in the
+same release. That catches a corrupt download; it does not catch a release whose archive
+and checksum were both replaced. Only the installer script used by the non-GitHub recipes
+([`examples/install-logdrop-taint.sh`](examples/install-logdrop-taint.sh)) carries a table
+of expected checksums inside the commit you pin.
 
 `@v1` still works and still tracks the latest 1.x. It asks you to trust us continuously
 rather than once, which is a reasonable thing to choose — it should just be a choice
 rather than the only option shown.
 
-The hash above is what `v1` points to today. Find the current one with:
+The hash above is the commit `v1` pointed to when this README was last updated. `v1`
+moves with each release, so find the current one with:
 
 ```bash
 gh api repos/initialcodess/logdrop-taint-ios-action/commits/v1 --jq .sha
@@ -92,7 +98,9 @@ viewer, or feed it into your own dashboard.
 
 **Ready-made recipes:** [`examples/`](examples/) has working setups for CircleCI,
 GitLab CI, Jenkins, Bitrise, fastlane, an Xcode build phase and a local machine —
-all built on the same install script.
+all built on the same install script. The recipes call scripts that live in this
+repository, not in yours, so copy them into your project first; see
+[`examples/README.md`](examples/README.md#getting-the-scripts).
 
 ## Where you see the findings
 
@@ -140,7 +148,7 @@ A file named directly on the command line is always scanned, whatever it is call
 Memory and resource leaks are reported too, and are on by default — set
 `leaks: "false"` to turn them off. They are a different question from the ones
 above (not "did a value reach somewhere dangerous" but "was an owned thing ever
-given back"), and they add roughly a quarter to the scan time.
+given back"), and they add roughly 30% to the scan time.
 
 | Scenario | CWE |
 |---|---|
@@ -168,12 +176,12 @@ for the same app on one screen, and carry "this is a false positive" decisions
 across scans, you can send the report to the panel:
 
 ```yaml
-- uses: initialcodess/logdrop-taint-ios-action@ad9adc4f52f9a239191805e677034d38de5bf0f3  # v1
+- uses: initialcodess/logdrop-taint-ios-action@6466f50054d759603d2ff67fc79cdbbb2fdf80af  # v1
   with:
     license: ${{ secrets.LOGDROP_LICENSE }}
     path: Sources
     bundle-id: com.company.app           # required when sending to the panel
-    panel-url: https://panel.logdrop.io
+    panel-url: https://analyze.logdrop.io
 ```
 
 **Off by default.** Without `panel-url` nothing is sent and the scan stays entirely
@@ -264,7 +272,7 @@ rejected before the scan starts, and the message lists the valid ones.
 | `fail-on-findings` | `false` | Fail the step when there are findings. |
 | `annotations` | `true` | Inline boxes on the pull request. |
 | `snippets` | `true` | The offending line plus ±2 lines of context in the report. With `false`, no fragment of your code leaves. |
-| `leaks` | `true` | Report memory and resource leaks as well as security findings. Adds roughly 25% to the scan; `false` turns it off. |
+| `leaks` | `true` | Report memory and resource leaks as well as security findings. Adds roughly 30% to the scan; `false` turns it off. |
 | `upload-sarif` | `true` | Attempt to upload to Code Scanning. |
 | `sarif-file` | `logdrop-taint.sarif` | SARIF output path. |
 | `repo-root` | `github.workspace` | The root SARIF paths are relative to. |
@@ -279,12 +287,12 @@ failed).
 
 ## Exit codes
 
-The three mean different things and are never conflated:
+The four mean different things and are never conflated:
 
 | Code | Meaning |
 |---|---|
 | `0` | Clean — no findings |
-| `1` | Findings (only with `fail-on-findings: "true"`) |
+| `1` | Findings (only with `fail-on-findings: "true"`; `note`-level findings never cause it) |
 | `2` | A licence problem (missing / invalid / expired) |
 | `3` | An error in the `.logdrop.json` config file |
 

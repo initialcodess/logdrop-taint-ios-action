@@ -1,5 +1,10 @@
 # Bitrise — LogDrop Taint
 #
+# GET THE TWO SCRIPTS FIRST. This recipe calls examples/install-logdrop-taint.sh
+# and examples/report-to-panel.sh. They live in the action repository, not in yours:
+# copy them into your repository at those paths (or fetch them at the commit you pin).
+# Commands: examples/README.md, section "Getting the scripts".
+#
 # Bitrise already runs on a macOS stack, so there is nothing extra to require.
 #
 # LICENCE: add `LOGDROP_LICENSE` under Secrets in Bitrise (consider leaving "Expose
@@ -12,9 +17,9 @@
 #   BUNDLE_ID        your application's bundle id, AS REGISTERED IN THE PANEL
 #
 # Miss any one and nothing is sent: the step prints a line and stays green,
-# which is easy not to notice. A BUNDLE_ID the panel does not recognise for
-# this project is refused (400) and FAILS the step, so a wrong id is loud
-# rather than silent.
+# which is easy not to notice. A report the panel refuses (a BUNDLE_ID it does
+# not recognise for this project, say) is a loud warning, but the step still
+# exits 0. Set FAIL_ON_DELIVERY_ERROR=true to make any failed delivery fail it.
 # Set all three under Secrets, next to the licence key.
 format_version: "13"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git

@@ -2,6 +2,13 @@
 #
 # LogDrop Taint — Xcode build phase.
 #
+# INSTALL THE ANALYZER FIRST (once). This script only RUNS the analyzer, and it
+# looks for it at ~/.logdrop/bin/logdrop-taint. Without that file it prints
+# "warning: LogDrop Taint is not installed" and the build carries on, so a skipped
+# install is easy to miss. The commands are in examples/README.md, section "In Xcode".
+# To send reports it also needs ~/.logdrop/report-to-panel.sh; without that file the
+# panel step is skipped with no message at all.
+#
 # ADDING IT (once, about a minute):
 #   1. Copy this file to ~/.logdrop/xcode-scan.sh and chmod +x it.
 #   2. In Xcode: select the project, pick your target, open Build Phases.
